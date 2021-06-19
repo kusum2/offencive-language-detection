@@ -3,12 +3,13 @@
 
 # # Offensive Language Detection
 
-# In[124]:
+# In[138]:
 
 
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 import numpy as np
 import warnings
@@ -16,14 +17,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# In[125]:
+# In[139]:
 
 
 dataset = pd.read_csv("HateSpeechData.csv")
 dataset.head(10)
 
 
-# In[126]:
+# In[140]:
 
 
 def highlight_col(x):
@@ -37,31 +38,31 @@ def highlight_col(x):
 dataset.head(5).style.apply(highlight_col, axis=None)
 
 
-# In[127]:
+# In[141]:
 
 
 dataset.info()
 
 
-# In[128]:
+# In[142]:
 
 
 dataset.offensive_language.value_counts()
 
 
-# In[129]:
+# In[143]:
 
 
 dataset.isnull().sum()
 
 
-# In[130]:
+# In[144]:
 
 
 dataset['class'].hist()
 
 
-# In[131]:
+# In[145]:
 
 
 import matplotlib.pyplot as plt
@@ -76,14 +77,14 @@ plt.pie(y, labels = mylabels)
 plt.show() 
 
 
-# In[132]:
+# In[146]:
 
 
 dataset['text length'] = dataset['tweet'].apply(len)
 print(dataset.head())
 
 
-# In[133]:
+# In[147]:
 
 
 import seaborn as sns
@@ -92,7 +93,7 @@ graph = sns.FacetGrid(data=dataset, col='class')
 graph.map(plt.hist, 'text length', bins=50)
 
 
-# In[134]:
+# In[148]:
 
 
 dataset=dataset.drop(['Unnamed: 0','count','hate_speech','offensive_language','neither'], axis = 1)
@@ -101,7 +102,7 @@ dataset.head(5)
 
 # # Preprocessing of tweets
 
-# In[135]:
+# In[149]:
 
 
 def preprocess(tweet):  
@@ -129,7 +130,7 @@ dataset.head(10)
 
 # # Feature Engineering
 
-# In[136]:
+# In[150]:
 
 
 #TF-IDF Features-F1
@@ -138,7 +139,7 @@ tfidf_vectorizer = TfidfVectorizer()
 tfidf = tfidf_vectorizer.fit_transform(dataset['processed_tweets'] )
 
 
-# In[137]:
+# In[151]:
 
 
 from sklearn.metrics import classification_report
@@ -151,8 +152,30 @@ y_preds = model.predict(X_test_tfidf)
 print(classification_report(y_test,y_preds))
 
 
+# In[153]:
+
+
+matrix = confusion_matrix(y_test,y_preds, labels=[1,0])
+print('Confusion matrix : \n',matrix)
+
+
+# In[154]:
+
+
+sns.heatmap(matrix/np.sum(matrix), annot=True, 
+            fmt='.2%', cmap='Blues')
+
+
+# In[156]:
+
+
+labels = ['True Pos','False Pos','False Neg','True Neg']
+labels = np.asarray(labels).reshape(2,2)
+sns.heatmap(matrix, annot=labels, fmt='', cmap='Blues')
+
+
 # In[ ]:
 
 
-v
+
 
